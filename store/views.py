@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as d_l
 from django.contrib.auth.models import User, UserManager
 from django.contrib.auth.decorators import login_required
 import re
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 # Create your views here.
 @login_required(login_url='store:login')
 def store(request):
@@ -22,8 +23,18 @@ def store(request):
         order={'get_cart_total':0, 'get_cart_items':0}
         cartItems=order['get_cart_items']
 
-    products=Product.objects.all()
-    context={'products':products, 'cartItems':cartItems}
+    products=Product.objects.all().order_by('id')
+    paginator=Paginator(products, 3)
+    page=request.GET.get('page', 1)
+    
+    try:
+        posts=paginator.page(page)
+    except PageNotAnInteger:
+        posts=paginator.page(1)
+    except EmptyPage:
+        posts=paginator.page(paginator.num_pages)
+
+    context={'products':products, 'cartItems':cartItems, 'page:':page, 'posts':posts}
     return render(request, 'store/store.html', context)
 
 @login_required(login_url='store:login')
@@ -215,3 +226,67 @@ def register(request):
 def logout(request):
     d_logout(request)
     return redirect('store:login')
+
+
+
+def product(request, pk):
+    customer=request.user.customer
+    product=Product.objects.get(id=pk)
+    rating_sum=0
+    total_ratings=0
+    ratings=Rating.objects.filter(product=product)
+    for rating in ratings:
+        rating_sum=rating_sum+rating.rated
+        total_ratings=total_ratings+1
+    comments=Comment.objects.filter(product=product).order_by('-id')
+    order, created=Order.objects.get_or_create(customer=customer, complete=False)
+    cartItems=order.get_cart_items
+    if total_ratings!=0:
+        avg_rating=rating_sum/total_ratings
+    else:
+        avg_rating=0
+    if request.method=='POST':
+        comment_sub=request.POST.get('comment')
+        if(len(comment_sub)!=0):
+            comment=Comment.objects.create(customer=customer, product=product, text= comment_sub)
+            comment.save()
+            return redirect('store:product',pk)
+        else:
+            return redirect('store:product',pk)
+
+
+    context={'product':product, 'comments':comments, 'customer':customer, 'cartItems':cartItems, 'avg_rating':avg_rating, 'rated_by':total_ratings}
+    return render(request, 'store/product.html', context)
+
+
+def delete(request, pk, pk2):
+    customer=request.user.customer
+    comment=Comment.objects.filter(id=pk, customer=customer)
+    if(len(comment)==0):
+        return redirect('store:store')
+    comment.delete()
+    return redirect('store:product',pk2)
+
+
+def rate(request, pk):
+    product=Product.objects.filter(id=pk)
+    customer=request.user.customer
+    already_Rated=False
+    ratings=Rating.objects.filter(customer=customer, product=product[0])
+    if(len(ratings)!=0):
+        already_Rated=True
+    if(len(product)==0):
+        return redirect('store:store')
+    
+    if request.method=='POST':
+        rated=request.POST.get('rate')
+        
+        if rated is not None:
+            rated_int=int(rated)
+            new_rating=Rating.objects.create(customer=customer, product=product[0], rated=rated_int)
+            return redirect('store:store')
+        else:
+            print("got here")
+            messages.info(request, "Invalid Rating")
+    context={'product':product[0], 'already_rated':already_Rated}
+    return render(request, 'store/rate.html', context)

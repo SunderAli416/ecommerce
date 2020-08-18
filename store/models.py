@@ -18,7 +18,7 @@ class Product(models.Model):
     price=models.FloatField()
     digital=models.BooleanField(default=False, null=True, blank=True)
     image=models.ImageField(null=True, blank=True)
-
+    description=models.TextField(null=True, blank=True)
     def __str__(self):
         return self.name
     
@@ -29,6 +29,7 @@ class Product(models.Model):
         except:
             url=''
         return url
+
 
 
 
@@ -89,3 +90,17 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return self.address
+
+
+class Comment(models.Model):
+    customer=models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    text=models.TextField(null=True, blank=True)
+    posted_at=models.DateTimeField(null=True, auto_now_add=True)
+
+
+
+class Rating(models.Model):
+    customer=models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    rated=models.IntegerField(default=0)

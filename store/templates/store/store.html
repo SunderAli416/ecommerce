@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 	<div class="row">
-        {% for product in products %}
+        {% for product in posts %}
 		<div class="col-lg-4">
 			<img class="thumbnail" src="{{product.imageURL}}">
 			<div class="box-element product">
@@ -10,7 +10,7 @@
 				<hr>
 
 				<button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-				<a class="btn btn-outline-success" href="#">View</a>
+				<a class="btn btn-outline-success" href="{% url 'store:product' product.id%}">View</a>
 				<h4 style="display: inline-block; float: right"><strong>${{product.price}}</strong></h4>
 
 			</div>
@@ -19,5 +19,7 @@
 		
 		
 	</div>
+
+	{% include 'store/pagination.html' with page=posts %}
 
 {% endblock content %}

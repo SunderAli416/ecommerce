@@ -1,0 +1,156 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+.comment-wrapper .panel-body {
+    max-height:650px;
+    overflow:auto;
+}
+
+.comment-wrapper .media-list .media img {
+    width:64px;
+    height:64px;
+    border:2px solid #e5e7e8;
+}
+
+.comment-wrapper .media-list .media {
+    border-bottom:1px dashed #efefef;
+    margin-bottom:25px;
+}
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+  font-family: arial;
+}
+
+.price {
+  color: grey;
+  font-size: 22px;
+}
+
+.card button {
+  border: none;
+  outline: 0;
+  padding: 12px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  font-size: 18px;
+}
+
+.card button:hover {
+  opacity: 0.7;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+}
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+}
+.rate:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+}
+.rate:not(:checked) > label {
+    float:right;
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+}
+.rate:not(:checked) > label:before {
+    content: '★ ';
+}
+.rate > input:checked ~ label {
+    color: #ffc700;    
+}
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;  
+}
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
+</style>
+<div class="card">
+    <img src="{{product.imageURL}}" alt="{{product.name}}" style="width:100%">
+    <h1>{{product.name}}</h1>
+    <p class="price">${{product.price}}</p>
+    <p>{{product.description}}</p>
+    <p>Rated: {{avg_rating|floatformat:1}}</p>
+    <p>Rated By {{rated_by}} Customers</p>
+      <a href="{% url 'store:rate' product.id %}" class="btn btn-info">Rate</a>
+
+      
+    <p><button>Add to Cart</button></p>
+  </div>
+
+
+  <div class="container">
+    <div class="row bootstrap snippets bootdeys">
+        <div class="col-md-8 col-sm-12">
+            <div class="comment-wrapper">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        Comment panel
+                    </div>
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                    <div class="panel-body">
+                        
+                        <textarea class="form-control" placeholder="write a comment..." name="comment" rows="3"></textarea>
+                        
+                        <br>
+                        <button type="submit" class="btn btn-info pull-right">Post</button>
+                        </form>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <ul class="media-list">
+                            {% for comment in comments %}
+                            <li class="media">
+                                
+                                <div class="media-body">
+                                    <span class="text-muted pull-right">
+                                        <small class="text-muted">{{comment.posted_at}}</small>
+                                    </span>
+                                    <strong class="text-success">@{{comment.customer.name}}</strong>
+                                    <p>
+                                       {{comment.text}}.
+                                    </p>
+                                    {% if comment.customer == customer %}
+                                    <a href="{% url 'store:delete' comment.id product.id%}" class="">Delete Comment</a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                            
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+    </div>
+    </div>
+
+
+
+
+
+{% endblock content %}

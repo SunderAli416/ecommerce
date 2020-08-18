@@ -12,5 +12,8 @@ urlpatterns = [
     path('payment_form/<str:pk>/',views.payment, name='payment'),
     path('login/',views.login, name='login'),
     path('register/',views.register, name='register'),
-    path('logout/',views.logout, name='logout')
+    path('logout/',views.logout, name='logout'),
+    path('product/<str:pk>', views.product, name='product'),
+    path('delete/<str:pk>/<str:pk2>', views.delete, name='delete'),
+    path('rate/<str:pk>',views.rate, name='rate'),
 ]
