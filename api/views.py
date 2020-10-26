@@ -53,7 +53,6 @@ def verify(request):
         merchant_account=BankAccount.objects.get(account_no=merchant_account)
         if(customer_account[0].amount<amount2):
             return JsonResponse('2',safe=False)
-        
         customer_account[0].amount=customer_account[0].amount-amount2
         merchant_account.amount=merchant_account.amount+amount
         customer_account[0].save()
